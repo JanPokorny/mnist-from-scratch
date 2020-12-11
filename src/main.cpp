@@ -4,6 +4,7 @@
 
 #include "network.h"
 #include "io.h"
+#include "trainer.h"
 
 constexpr size_t input_size = 28 * 28;
 constexpr size_t output_size = 10;
@@ -21,6 +22,8 @@ int main() {
     auto start_clock = std::chrono::high_resolution_clock::now();
     auto start_time = std::chrono::high_resolution_clock::to_time_t(start_clock);
     std::cerr << "Program started at " << std::ctime(&start_time);
+
+    auto random_engine = std::default_random_engine(42); // NOLINT(cert-msc51-cpp)
 
     std::cerr << "Loading train images..." << std::endl;
     std::ifstream train_images_infile(train_images_path);
@@ -43,8 +46,15 @@ int main() {
     test_labels_infile.close();
 
     std::cerr << "Training the network..." << std::endl;
-    Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(42);
-    network.SGD<10>(std::cout, train_images, train_labels, test_images, test_labels, 30, 3.0);
+    Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
+    Trainer<decltype(network)> trainer {
+        network,
+        train_images,
+        train_labels,
+        test_images,
+        test_labels
+    };
+    trainer.SGD_dumb<10>(random_engine, 30, 3.0);
 
     /*
     std::cerr << "Inferring train predictions..." << std::endl;

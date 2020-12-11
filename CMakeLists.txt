@@ -11,11 +11,11 @@ add_executable(pv021_project src/main.cpp)
 # add_compile_options(-O0)
 
 # GOTTA GO FAST
-add_compile_options(-ffast-math -funsafe-math-optimizations -O3)
+add_compile_options(-O3 -ffast-math -funsafe-math-optimizations)
 
 # OpenMP
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(pv021_project PUBLIC OpenMP::OpenMP_CXX)
-endif()
-#add_compile_options(-fopenmp=libgomp)
+# find_package(OpenMP)
+# if(OpenMP_CXX_FOUND)
+#     target_link_libraries(pv021_project PUBLIC OpenMP::OpenMP_CXX)
+# endif()
+# add_compile_options(-fopenmp=libgomp)
