@@ -4,6 +4,7 @@
 #include <random>
 #include <numeric>
 #include <memory>
+#include <thread>
 
 #include "types.h"
 #include "vec_ops.h"
@@ -78,7 +79,7 @@ public:
         return (number) predicted_correctly / xs.size();
     }
 
-    output_type backprop(input_type activation, final_output_type y) {
+    output_type backprop(input_type const& activation, final_output_type const& y) {
         output_type z = dot(weights, activation) + biases;
         output_type next_activation = vec_map<sigmoid>(z);
 
@@ -90,7 +91,9 @@ public:
             delta = (next_activation - y) * vec_map<sigmoid_prime>(z);
         }
 
+#pragma omp critical
         nabla_biases = nabla_biases + delta;
+#pragma omp critical
         nabla_weights = nabla_weights + dot(delta, activation);
 
         return delta;
@@ -113,11 +116,15 @@ public:
         for (size_t epoch = 0; epoch < epochs; epoch++) {
             auto start_clock = std::chrono::high_resolution_clock::now();
             std::shuffle(idx.begin(), idx.end(), *random_engine_ptr);
-            for (size_t i = 0; i < xs.size(); i++) {
-                backprop(xs[idx[i]], onehot<final_output_type::rows>(ys[idx[i]]));
-                if ((i + 1) % mini_batch_size == 0 || i == xs.size() - 1)
-                    update_weights(eta / mini_batch_size);
+            for(size_t mini_batch_start = 0; mini_batch_start < xs.size(); mini_batch_start += mini_batch_size) {
+                size_t mini_batch_end = std::min(mini_batch_start + mini_batch_size, xs.size());
+#pragma omp parallel for num_threads(4) default(none) shared(idx, xs, ys, mini_batch_start, mini_batch_end)
+                for (size_t i = mini_batch_start; i < mini_batch_end; i++) {
+                    backprop(xs[idx[i]], onehot<final_output_type::rows>(ys[idx[i]]));
+                }
+                update_weights(eta / mini_batch_size);
             }
+
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
             out << "Epoch " << epoch << " | train_acc: " << evaluate_accuracy(xs, ys) << ", test_acc: "

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-command -v module && echo "Adding some modules" && module add cmake llvm
+command -v module >/dev/null 2>&1 && echo "Adding some modules" && module add cmake-3.18.3 llvm-9.0.1
 
 echo "#################"
 echo "    COMPILING    "
 echo "#################"
-mkdir cmake-build-debug
+mkdir cmake-build-debug >/dev/null 2>&1
 cd cmake-build-debug || exit
-cmake ..
+CC=$(which clang) CXX=$(which clang++) cmake ..
 make
 
 echo "#################"
