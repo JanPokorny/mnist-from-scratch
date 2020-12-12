@@ -69,8 +69,7 @@ struct Trainer {
         }
     }
 
-    template<size_t mini_batch_size>
-    void SGD_parallel(std::default_random_engine &random_engine, size_t epochs, number eta) {
+    void SGD_parallel(std::default_random_engine &random_engine, size_t mini_batch_size, size_t epochs, number eta) {
         size_t num_threads = std::thread::hardware_concurrency();
         if(num_threads == 0)
             num_threads = 8;
@@ -109,8 +108,9 @@ struct Trainer {
             threads[i] = std::thread(thread_work, i, random_engine());
         }
 
+        double total_elapsed_seconds = 0.0;
+        double best_test_accuracy = 0.8;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
-            std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
 
             size_t mini_batches_per_epoch = train_xs.size() / mini_batch_size;
@@ -125,11 +125,17 @@ struct Trainer {
                     nabla = {};
             }
             auto end_clock = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
-            std::cerr << " done in " << elapsed_seconds.count() << "s | train_acc: " << evaluate_accuracy(train_xs, train_ys) << ", test_acc: " << evaluate_accuracy(test_xs, test_ys) << std::endl;
+            double elapsed_seconds = std::chrono::duration<double>(end_clock - start_clock).count();
+            total_elapsed_seconds += elapsed_seconds;
+            double test_accuracy = evaluate_accuracy(test_xs, test_ys);
+            if(test_accuracy > best_test_accuracy) {
+                std::cerr << test_accuracy << " @ " << elapsed_seconds << "s" << std::endl;
+                break;
+            }
+
         }
 
-        done =true;
+        done = true;
         cv_worker.notify_all();
         for(size_t i = 0; i < num_threads; i++) {
             threads[i].join();

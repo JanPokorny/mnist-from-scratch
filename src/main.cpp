@@ -46,16 +46,21 @@ int main() {
     test_labels_infile.close();
 
     std::cerr << "Training the network..." << std::endl;
-    Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
-    Trainer<decltype(network)> trainer {
-        network,
-        train_images,
-        train_labels,
-        test_images,
-        test_labels
-    };
-    trainer.SGD_parallel<60>(random_engine, 30, 3.0);
-    std::cout << network;
+
+    for(size_t batch_size = 16; batch_size < 60000; batch_size *= 2) {
+        std::cerr << "Trying batch_size=" << batch_size << std::endl;
+        Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
+        Trainer<decltype(network)> trainer {
+                network,
+                train_images,
+                train_labels,
+                test_images,
+                test_labels
+        };
+        trainer.SGD_parallel(random_engine, batch_size, 30, 3.0);
+    }
+
+    return 0;
 
     /*
     std::cerr << "Inferring train predictions..." << std::endl;
@@ -66,7 +71,7 @@ int main() {
     save_labels(predicted_train_labels_outfile, predicted_train_labels);
     predicted_train_labels_outfile.close();
     */
-
+/*
     std::cerr << "Inferring test predictions..." << std::endl;
     std::vector<label_type> predicted_test_labels = network.predict(test_images);
 
@@ -81,5 +86,5 @@ int main() {
     std::cerr << "Program ended at " << std::ctime(&end_time);
     std::cerr << "Elapsed time: " << elapsed_seconds.count();
 
-    return 0;
+    return 0;*/
 }
