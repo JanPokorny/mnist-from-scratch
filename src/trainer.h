@@ -29,7 +29,9 @@ struct Trainer {
     void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta) {
         std::vector<size_t> idx(train_xs.size());
         std::iota(idx.begin(), idx.end(), 0);
+        double total_elapsed_seconds = 0.0;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
+            std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
             std::shuffle(idx.begin(), idx.end(), random_engine);
             for(size_t mini_batch_start = 0; mini_batch_start < train_xs.size(); mini_batch_start += mini_batch_size) {
@@ -43,15 +45,18 @@ struct Trainer {
 
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
-            std::cerr << "Epoch " << epoch << " | train_acc: " << evaluate_accuracy(train_xs, train_ys) << ", test_acc: "
-                      << evaluate_accuracy(test_xs, test_ys) << ", took " << elapsed_seconds.count() << "s" << std::endl;
+            total_elapsed_seconds += elapsed_seconds.count();
+            double test_accuracy = evaluate_accuracy(test_xs, test_ys);
+            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << std::endl;
         }
     }
 
     template<size_t mini_batch_size>
     void SGD_dumb(std::default_random_engine &random_engine, size_t epochs, number eta) {
         std::uniform_int_distribution<size_t> train_distribution(0, train_xs.size() - 1);
+        double total_elapsed_seconds = 0.0;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
+            std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
             for(size_t mini_batch_start = 0; mini_batch_start < train_xs.size(); mini_batch_start += mini_batch_size) {
                 nabla_type nabla = {};
@@ -64,20 +69,24 @@ struct Trainer {
 
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
-            std::cerr << "Epoch " << epoch << " | train_acc: " << evaluate_accuracy(train_xs, train_ys) << ", test_acc: "
-                      << evaluate_accuracy(test_xs, test_ys) << ", took " << elapsed_seconds.count() << "s" << std::endl;
+            total_elapsed_seconds += elapsed_seconds.count();
+            double test_accuracy = evaluate_accuracy(test_xs, test_ys);
+            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << std::endl;
         }
     }
 
-    void SGD_parallel(std::default_random_engine &random_engine, size_t mini_batch_size, size_t epochs, number eta) {
-        size_t num_threads = std::thread::hardware_concurrency();
-        if(num_threads == 0)
-            num_threads = 8;
+    // TODO: fix, learns slower compared to full / dumb, investigate
+    template<size_t mini_batch_size>
+    void SGD_parallel(std::default_random_engine &random_engine, size_t epochs, number eta) {
+        constexpr size_t num_threads = 2;
+        constexpr size_t thread_batch_size = mini_batch_size / num_threads;
+
+        if(mini_batch_size % num_threads > 0) throw;
 
         size_t mini_batch_items_remaining = 0;
         size_t mini_batch_items_done = 0;
         bool done = false;
-        std::vector<nabla_type> nablas(num_threads);
+        std::array<nabla_type, num_threads> nablas;
         std::mutex m;
         std::condition_variable cv_worker;
         std::condition_variable cv_boss;
@@ -91,13 +100,15 @@ struct Trainer {
                     std::unique_lock<std::mutex> lk(m);
                     cv_worker.wait(lk, [&] { return mini_batch_items_remaining > 0 || done; });
                     if (done) return;
-                    mini_batch_items_remaining--;
+                    mini_batch_items_remaining -= thread_batch_size;
                 }
-                size_t idx = train_distribution(random_engine);
-                network.backprop(nablas[id], train_xs[idx], onehot<final_output_type::rows>(train_ys[idx]));
+                for(size_t i = 0; i < thread_batch_size; i++) {
+                    size_t idx = train_distribution(random_engine);
+                    network.backprop(nablas[id], train_xs[idx], onehot<final_output_type::rows>(train_ys[idx]));
+                }
                 {
                     std::unique_lock<std::mutex> lk(m);
-                    mini_batch_items_done++;
+                    mini_batch_items_done += thread_batch_size;
                 }
                 cv_boss.notify_all();
             }
@@ -109,10 +120,9 @@ struct Trainer {
         }
 
         double total_elapsed_seconds = 0.0;
-        double best_test_accuracy = 0.8;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
+            std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
-
             size_t mini_batches_per_epoch = train_xs.size() / mini_batch_size;
             for(size_t i = 0; i < mini_batches_per_epoch; i++) {
                 std::unique_lock<std::mutex> lk(m);
@@ -128,11 +138,7 @@ struct Trainer {
             double elapsed_seconds = std::chrono::duration<double>(end_clock - start_clock).count();
             total_elapsed_seconds += elapsed_seconds;
             double test_accuracy = evaluate_accuracy(test_xs, test_ys);
-            if(test_accuracy > best_test_accuracy) {
-                std::cerr << test_accuracy << " @ " << elapsed_seconds << "s" << std::endl;
-                break;
-            }
-
+            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << std::endl;
         }
 
         done = true;

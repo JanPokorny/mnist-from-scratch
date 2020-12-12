@@ -97,8 +97,8 @@ vec<C> dot(mat<R, C> const &a, vec<R> const &b) {
 template<size_t R, size_t C>
 vec<C> dot_t(mat<C, R> const &a, vec<R> const &b) {
     vec<C> result = {};
-    for (size_t c = 0; c < C; c++)
-        for (size_t r = 0; r < R; r++)
+    for (size_t r = 0; r < R; r++)
+        for (size_t c = 0; c < C; c++)
             result[c] += a.at(c, r) * b[r];
     return std::move(result);
 }

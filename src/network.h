@@ -49,7 +49,7 @@ struct Network<previous_layer, current_layer, args...> {
     }
 
     auto feedforward(input_type const &a) const {
-        return tail_network.feedforward(vec_map<sigmoid>(dot(weights, a) + biases));
+        return tail_network.feedforward(current_layer::activation_fn(dot(weights, a) + biases));
     }
 
     size_t predict(input_type const &a) const {
@@ -63,20 +63,19 @@ struct Network<previous_layer, current_layer, args...> {
         return std::move(predicted_labels);
     }
 
-    output_type backprop(nabla_type &nabla, input_type const& activation, final_output_type const& y) const {
-        output_type z = dot(weights, activation) + biases;
-        output_type next_activation = vec_map<sigmoid>(z);
+    output_type backprop(nabla_type &nabla, input_type const& prev_activation, final_output_type const& y) const {
+        output_type z = dot(weights, prev_activation) + biases;
 
         output_type delta;
-        if constexpr (!current_layer::is_output) {
-            auto next_delta = tail_network.backprop(nabla.tail_nabla, next_activation, y);
-            delta = dot_t(tail_network.weights, next_delta) * vec_map<sigmoid_prime>(z);
+        if constexpr (current_layer::is_output) {
+            delta = (current_layer::activation_fn(z) - y) * current_layer::activation_fn_prime(z);
         } else {
-            delta = (next_activation - y) * vec_map<sigmoid_prime>(z);
+            auto next_delta = tail_network.backprop(nabla.tail_nabla, current_layer::activation_fn(z), y);
+            delta = dot_t(tail_network.weights, next_delta) * current_layer::activation_fn_prime(z);
         }
 
         nabla.biases = nabla.biases + delta;
-        nabla.weights = nabla.weights + dot(delta, activation);
+        nabla.weights = nabla.weights + dot(delta, prev_activation);
 
         return delta;
     }

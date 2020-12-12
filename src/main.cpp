@@ -47,18 +47,16 @@ int main() {
 
     std::cerr << "Training the network..." << std::endl;
 
-    for(size_t batch_size = 16; batch_size < 60000; batch_size *= 2) {
-        std::cerr << "Trying batch_size=" << batch_size << std::endl;
-        Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
-        Trainer<decltype(network)> trainer {
-                network,
-                train_images,
-                train_labels,
-                test_images,
-                test_labels
-        };
-        trainer.SGD_parallel(random_engine, batch_size, 30, 3.0);
-    }
+    Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
+    Trainer<decltype(network)> trainer {
+            network,
+            train_images,
+            train_labels,
+            test_images,
+            test_labels
+    };
+
+    trainer.SGD_dumb<10>(random_engine, 30, 3.0);
 
     return 0;
 
