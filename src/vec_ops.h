@@ -65,14 +65,6 @@ mat<R, C> operator*(mat<R, C> const &a, number b) {
 }
 
 template<size_t R>
-number sum(vec<R> const &a) {
-    number result = 0;
-    for (size_t i = 0; i < R; i++)
-        result += a[i];
-    return result;
-}
-
-template<size_t R>
 size_t argmax(vec<R> const &a) {
     return std::distance(a.begin(), std::max_element(a.begin(), a.end()));
 }

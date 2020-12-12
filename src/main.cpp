@@ -54,7 +54,8 @@ int main() {
         test_images,
         test_labels
     };
-    trainer.SGD_dumb<10>(random_engine, 30, 3.0);
+    trainer.SGD_parallel<60>(random_engine, 30, 3.0);
+    std::cout << network;
 
     /*
     std::cerr << "Inferring train predictions..." << std::endl;

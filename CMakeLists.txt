@@ -11,11 +11,8 @@ add_executable(pv021_project src/main.cpp)
 # add_compile_options(-O0)
 
 # GOTTA GO FAST
-add_compile_options(-O3 -ffast-math -funsafe-math-optimizations)
+add_compile_options(-Ofast -ffp-model=fast -funsafe-math-optimizations)
 
-# OpenMP
-# find_package(OpenMP)
-# if(OpenMP_CXX_FOUND)
-#     target_link_libraries(pv021_project PUBLIC OpenMP::OpenMP_CXX)
-# endif()
-# add_compile_options(-fopenmp=libgomp)
+# Threads
+find_package(Threads REQUIRED)
+target_link_libraries(pv021_project PRIVATE Threads::Threads)
