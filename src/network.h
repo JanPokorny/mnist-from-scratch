@@ -38,7 +38,7 @@ struct Network<previous_layer, current_layer, args...> {
                 b = distribution(random_engine);
 
         for (number &w : weights)
-            w = distribution(random_engine);
+            w = distribution(random_engine) /sqrt(input_type::size);
     }
 
     void print_to(std::ostream &out) const {
