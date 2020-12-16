@@ -56,7 +56,7 @@ int main() {
             test_labels
     };
 
-    trainer.SGD_dumb<10>(random_engine, 30, 3.0);
+    trainer.SGD_full<10>(random_engine, 30, 3.0);
 
     return 0;
 
