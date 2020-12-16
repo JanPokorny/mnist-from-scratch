@@ -87,7 +87,7 @@ struct Network<previous_layer, current_layer, args...> {
 //    }
     // L2 regularization (weight decay), lambda coefficient added
     void update_weights(nabla_type nabla, number eta_piece, number lambda) {
-        weights = (1 - lambda * eta_piece) * weights - nabla.weights * eta_piece;
+        weights =  weights * (1 - lambda * eta_piece) - nabla.weights * eta_piece;
         biases = biases - nabla.biases * eta_piece;
         tail_network.update_weights(nabla.tail_nabla, eta_piece);
     }
