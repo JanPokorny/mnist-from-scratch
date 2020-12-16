@@ -25,8 +25,9 @@ struct Trainer {
         return (number) predicted_correctly / xs.size();
     }
 
+//lambda added
     template<size_t mini_batch_size>
-    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta) {
+    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda) {
         std::vector<size_t> idx(train_xs.size());
         std::iota(idx.begin(), idx.end(), 0);
         double total_elapsed_seconds = 0.0;
@@ -40,7 +41,7 @@ struct Trainer {
                 for (size_t i = mini_batch_start; i < mini_batch_end; i++) {
                     network.backprop(nabla, train_xs[idx[i]], onehot<final_output_type::rows>(train_ys[idx[i]]));
                 }
-                network.update_weights(nabla, eta / mini_batch_size);
+                network.update_weights(nabla, eta / mini_batch_size, lambda);
             }
 
             auto end_clock = std::chrono::high_resolution_clock::now();
