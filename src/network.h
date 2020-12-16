@@ -106,7 +106,7 @@ struct Network<output_layer> {
 
     vec<output_layer::size> feedforward(vec<output_layer::size> a) const { return a; }
 
-    void update_weights(__attribute__((unused)) nabla_type tail_nabla, __attribute__((unused)) number eta_piece) {}
+    void update_weights(__attribute__((unused)) nabla_type tail_nabla, __attribute__((unused)) number eta_piece, __attribute__((unused)) number lambda) {}
 };
 
 template<typename ...args>
