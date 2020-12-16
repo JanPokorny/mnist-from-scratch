@@ -53,7 +53,7 @@ struct Trainer {
     }
 
     template<size_t mini_batch_size>
-    void SGD_dumb(std::default_random_engine &random_engine, size_t epochs, number eta) {
+    void SGD_dumb(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda) {
         std::uniform_int_distribution<size_t> train_distribution(0, train_xs.size() - 1);
         double total_elapsed_seconds = 0.0;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
@@ -65,7 +65,7 @@ struct Trainer {
                     size_t idx = train_distribution(random_engine);
                     network.backprop(nabla, train_xs[idx], onehot<final_output_type::rows>(train_ys[idx]));
                 }
-                network.update_weights(nabla, eta / mini_batch_size);
+                network.update_weights(nabla, eta / mini_batch_size, lambda);
             }
 
             auto end_clock = std::chrono::high_resolution_clock::now();
@@ -78,7 +78,7 @@ struct Trainer {
 
     // TODO: fix, learns slower compared to full / dumb, investigate
     template<size_t mini_batch_size>
-    void SGD_parallel(std::default_random_engine &random_engine, size_t epochs, number eta) {
+    void SGD_parallel(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda) {
         constexpr size_t num_threads = 2;
         constexpr size_t thread_batch_size = mini_batch_size / num_threads;
 
@@ -131,7 +131,7 @@ struct Trainer {
                 mini_batch_items_remaining = mini_batch_size;
                 cv_worker.notify_all();
                 cv_boss.wait(lk, [&]{return mini_batch_items_done == mini_batch_size;});
-                network.update_weights(std::accumulate(nablas.begin(), nablas.end(), nabla_type()), eta / mini_batch_size);
+                network.update_weights(std::accumulate(nablas.begin(), nablas.end(), nabla_type()), eta / mini_batch_size, lambda);
                 for(auto &nabla : nablas)
                     nabla = {};
             }

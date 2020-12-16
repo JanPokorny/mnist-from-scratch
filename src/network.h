@@ -68,7 +68,9 @@ struct Network<previous_layer, current_layer, args...> {
 
         output_type delta;
         if constexpr (current_layer::is_output) {
-            delta = (current_layer::activation_fn(z) - y) * current_layer::activation_fn_prime(z);
+//            From cross entropy function
+              delta = (current_layer::activation_fn(z) - y);
+//            delta = (current_layer::activation_fn(z) - y) * current_layer::activation_fn_prime(z);
         } else {
             auto next_delta = tail_network.backprop(nabla.tail_nabla, current_layer::activation_fn(z), y);
             delta = dot_t(tail_network.weights, next_delta) * current_layer::activation_fn_prime(z);

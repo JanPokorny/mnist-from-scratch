@@ -18,4 +18,4 @@ echo "#################"
 echo "#################"
 echo "    EVALUATING   "
 echo "#################"
-python3 ./python_evaluator/evaluate.py ./out/actualTestPredictions ./data/fashion_mnist_test_labels.csv
+python3 ../python_evaluator/evaluate.py ./out/actualTestPredictions ./data/fashion_mnist_test_labels.csv
