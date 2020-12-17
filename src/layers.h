@@ -29,6 +29,11 @@ struct InputLayer : HiddenLayer<S> {
 template<size_t S>
 struct OutputLayer : HiddenLayer<S> {
     static constexpr bool is_output = true;
+// Using softmax for output layer
+	template<size_t R>
+    static constexpr vec<R> activation_fn(vec<R> const& z) {
+        return vec_map<softmax>(z);
+    }
 };
 
 #endif //PV021_PROJECT_LAYERS_H
