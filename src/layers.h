@@ -12,12 +12,12 @@ struct HiddenLayer : Layer {
 
     template<size_t R>
     static constexpr vec<R> activation_fn(vec<R> const& z) {
-        return vec_map<sigmoid>(z);
+        return vec_map<relu>(z);
     }
 
     template<size_t R>
     static constexpr vec<R> activation_fn_prime(vec<R> const& z) {
-        return vec_map<sigmoid_prime>(z);
+        return vec_map<relu_prime>(z);
     }
 };
 

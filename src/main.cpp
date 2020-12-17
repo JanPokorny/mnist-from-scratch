@@ -47,7 +47,7 @@ int main() {
 
     std::cerr << "Training the network..." << std::endl;
 
-    Network<InputLayer<input_size>, HiddenLayer<30>, OutputLayer<output_size>> network(random_engine);
+    Network<InputLayer<input_size>, HiddenLayer<128>, OutputLayer<output_size>> network(random_engine);
     Trainer<decltype(network)> trainer {
             network,
             train_images,
@@ -56,7 +56,7 @@ int main() {
             test_labels
     };
 
-    trainer.SGD_full<10>(random_engine, 30, 0.5, 5);
+    trainer.SGD_full<20>(random_engine, 10, 0.06, 0);
 
     return 0;
 
