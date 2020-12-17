@@ -42,6 +42,7 @@ struct Trainer {
                     network.backprop(nabla, train_xs[idx[i]], onehot<final_output_type::rows>(train_ys[idx[i]]));
                 }
                 network.update_weights(nabla, eta / mini_batch_size, lambda);
+				eta = 0.999 * eta
             }
 
             auto end_clock = std::chrono::high_resolution_clock::now();
