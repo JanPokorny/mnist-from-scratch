@@ -50,7 +50,7 @@ struct Trainer {
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
             total_elapsed_seconds += elapsed_seconds.count();
             double test_accuracy = evaluate_accuracy(test_xs, test_ys);
-            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << "| eta " << eta << "lambda " << lambda << std::endl;
+            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << "| eta " << eta << " lambda " << lambda << std::endl;
         }
     }
 
