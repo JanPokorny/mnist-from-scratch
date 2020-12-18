@@ -27,12 +27,10 @@ struct Trainer {
 
 //lambda added
     template<size_t mini_batch_size>
-    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda) {
+    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda, double eta_decrease_rate) {
         std::vector<size_t> idx(train_xs.size());
         std::iota(idx.begin(), idx.end(), 0);
         double total_elapsed_seconds = 0.0;
-	double eta_decrease_rate = 0.99999;
-	std::cerr << "eta decrease rate " << eta_decrease_rate << std::endl;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
             std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
