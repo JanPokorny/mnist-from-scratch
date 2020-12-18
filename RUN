@@ -4,14 +4,14 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 command -v module >/dev/null 2>&1 && echo "Adding GCC 10.2..." && module add gcc-10.2
-mkdir cmake-build-debug >/dev/null 2>&1
-cd cmake-build-debug || exit
+mkdir build >/dev/null 2>&1
+cd build || exit
 echo "Compiling main..." && g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -fopenmp -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
 
 echo "#################"
 echo "     RUNNING     "
 echo "#################"
-mkdir out >/dev/null 2>&1
+mkdir ../out >/dev/null 2>&1
 ./a.out
 
 echo "#################"
