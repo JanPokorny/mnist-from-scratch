@@ -6,7 +6,7 @@ echo "#################"
 command -v module >/dev/null 2>&1 && echo "Adding GCC 10.2..." && module add gcc-10.2
 mkdir build >/dev/null 2>&1
 cd build || exit
-echo "Compiling main..." && g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -fopenmp -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
+echo "Compiling main..." && g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
 
 echo "#################"
 echo "     RUNNING     "

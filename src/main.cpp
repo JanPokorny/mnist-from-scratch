@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <omp.h>
 
 #include "network.h"
 #include "io.h"
@@ -20,8 +19,6 @@ constexpr char predicted_train_labels_path[] = "../out/trainPredictions";
 constexpr char predicted_test_labels_path[] = "../out/actualTestPredictions";
 
 int main() {
-    omp_set_num_threads(4);
-
     auto start_clock = std::chrono::high_resolution_clock::now();
     auto start_time = std::chrono::high_resolution_clock::to_time_t(start_clock);
     std::cerr << "Program started at " << std::ctime(&start_time);
