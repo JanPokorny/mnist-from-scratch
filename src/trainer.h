@@ -1,11 +1,6 @@
 #ifndef PV021_PROJECT_TRAINER_H
 #define PV021_PROJECT_TRAINER_H
 
-#include <atomic>
-#include <condition_variable>
-
-using namespace std::chrono_literals;
-
 template<typename network_type>
 struct Trainer {
     using input_type = typename network_type::input_type;
@@ -15,13 +10,6 @@ struct Trainer {
     network_type &network;
     std::vector<input_type> const &train_xs;
     std::vector<label_type> const &train_ys;
-
-    number evaluate_accuracy(std::vector<input_type> const &xs, std::vector<size_t> const &ys) const {
-        size_t predicted_correctly = 0;
-        for (size_t i = 0; i < xs.size(); i++)
-            predicted_correctly += network.predict(xs[i]) == ys[i] ? 1 : 0;
-        return (number) predicted_correctly / xs.size();
-    }
 
     template<size_t mini_batch_size>
     void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, double eta_decrease_rate) {
@@ -44,10 +32,7 @@ struct Trainer {
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
             total_elapsed_seconds += elapsed_seconds.count();
-            std::cerr << " @ " << total_elapsed_seconds << "s"
-                      << " |"
-                      << " eta=" << eta
-                      << std::endl;
+            std::cerr << " @ " << total_elapsed_seconds << "s" << std::endl;
         }
     }
 };
