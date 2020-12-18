@@ -80,10 +80,10 @@ struct Network<previous_layer, current_layer, args...> {
         return delta;
     }
 
-    void update_weights(nabla_type nabla, number eta_piece, number lambda) {
-        weights =  weights * (1 - lambda * eta_piece) - nabla.weights * eta_piece;
+    void update_weights(nabla_type nabla, number eta_piece) {
+        weights =  weights - nabla.weights * eta_piece;
         biases = biases - nabla.biases * eta_piece;
-        tail_network.update_weights(nabla.tail_nabla, eta_piece, lambda);
+        tail_network.update_weights(nabla.tail_nabla, eta_piece);
     }
 };
 
@@ -100,7 +100,7 @@ struct Network<output_layer> {
 
     vec<output_layer::size> feedforward(vec<output_layer::size> a) const { return a; }
 
-    void update_weights(__attribute__((unused)) nabla_type tail_nabla, __attribute__((unused)) number eta_piece, __attribute__((unused)) number lambda) {}
+    void update_weights(__attribute__((unused)) nabla_type tail_nabla, __attribute__((unused)) number eta_piece) {}
 };
 
 template<typename ...args>

@@ -15,8 +15,6 @@ struct Trainer {
     network_type &network;
     std::vector<input_type> const &train_xs;
     std::vector<label_type> const &train_ys;
-    std::vector<input_type> const &test_xs;
-    std::vector<label_type> const &test_ys;
 
     number evaluate_accuracy(std::vector<input_type> const &xs, std::vector<size_t> const &ys) const {
         size_t predicted_correctly = 0;
@@ -26,7 +24,7 @@ struct Trainer {
     }
 
     template<size_t mini_batch_size>
-    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, number lambda, double eta_decrease_rate) {
+    void SGD_full(std::default_random_engine &random_engine, size_t epochs, number eta, double eta_decrease_rate) {
         std::vector<size_t> idx(train_xs.size());
         std::iota(idx.begin(), idx.end(), 0);
         double total_elapsed_seconds = 0.0;
@@ -40,17 +38,15 @@ struct Trainer {
                 for (size_t i = mini_batch_start; i < mini_batch_end; i++) {
                     network.backprop(nabla, train_xs[idx[i]], onehot<final_output_type::rows>(train_ys[idx[i]]));
                 }
-                network.update_weights(nabla, eta / mini_batch_size, lambda);
+                network.update_weights(nabla, eta / mini_batch_size);
                 eta = eta_decrease_rate * eta;
             }
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
             total_elapsed_seconds += elapsed_seconds.count();
-            double test_accuracy = evaluate_accuracy(test_xs, test_ys);
             std::cerr << " @ " << total_elapsed_seconds << "s"
-                      << " | test_acc=" << test_accuracy
+                      << " |"
                       << " eta=" << eta
-                      << " lambda=" << lambda
                       << std::endl;
         }
     }

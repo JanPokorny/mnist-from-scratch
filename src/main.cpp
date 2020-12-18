@@ -38,6 +38,29 @@ int main() {
     std::vector<label_type> train_labels = load_labels(train_labels_infile);
     train_labels_infile.close();
 
+    std::cerr << "Training the network..." << std::endl;
+    Network<InputLayer<input_size>, HiddenLayer<64>, OutputLayer<output_size>> network(random_engine);
+    Trainer<decltype(network)> trainer {
+            network,
+            train_images,
+            train_labels
+    };
+
+    size_t epochs = 28;
+    constexpr size_t batch_size = 64;
+    number eta_orig = 0.15;
+	double eta_decrease_rate = 0.99999;
+
+    trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, eta_decrease_rate);
+
+    std::cerr << "Inferring train predictions..." << std::endl;
+    std::vector<label_type> predicted_train_labels = network.predict(train_images);
+
+    std::cerr << "Writing train predictions..." << std::endl;
+    std::ofstream predicted_train_labels_outfile(predicted_train_labels_path);
+    save_labels(predicted_train_labels_outfile, predicted_train_labels);
+    predicted_train_labels_outfile.close();
+
     std::cerr << "Loading test images..." << std::endl;
     std::ifstream test_images_infile(test_images_path);
     std::vector<vec<input_size>> test_images = load_images<input_size>(test_images_infile);
@@ -47,32 +70,6 @@ int main() {
     std::ifstream test_labels_infile(test_labels_path);
     std::vector<label_type> test_labels = load_labels(test_labels_infile);
     test_labels_infile.close();
-
-    std::cerr << "Training the network..." << std::endl;
-    Network<InputLayer<input_size>, HiddenLayer<64>, OutputLayer<output_size>> network(random_engine);
-    Trainer<decltype(network)> trainer {
-            network,
-            train_images,
-            train_labels,
-            test_images,
-            test_labels
-    };
-    size_t epochs = 20;
-    constexpr size_t batch_size = 64;
-    number eta_orig = 0.15;
-    number lambda = 0;
-	double eta_decrease_rate = 0.99999;
-    std::cerr << "Batch size " << batch_size << " eta " << eta_orig << " lambda " << lambda << std::endl;
-	std::cerr << "eta decrease rate " << eta_decrease_rate << std::endl;
-    trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, lambda, eta_decrease_rate);
-
-    std::cerr << "Inferring train predictions..." << std::endl;
-    std::vector<label_type> predicted_train_labels = network.predict(train_images);
-
-    std::cerr << "Writing train predictions..." << std::endl;
-    std::ofstream predicted_train_labels_outfile(predicted_train_labels_path);
-    save_labels(predicted_train_labels_outfile, predicted_train_labels);
-    predicted_train_labels_outfile.close();
 
     std::cerr << "Inferring test predictions..." << std::endl;
     std::vector<label_type> predicted_test_labels = network.predict(test_images);
