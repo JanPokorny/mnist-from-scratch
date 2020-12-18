@@ -60,8 +60,10 @@ int main() {
     constexpr size_t batch_size = 64;
     number eta_orig = 0.15;
     number lambda = 0;
+	double eta_decrease_rate = 0.99999;
     std::cerr << "Batch size " << batch_size << " eta " << eta_orig << " lambda " << lambda << std::endl;
-    trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, lambda);
+	std::cerr << "eta decrease rate " << eta_decrease_rate << std::endl;
+    trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, lambda, eta_decrease_rate);
 
     return 0;
 
