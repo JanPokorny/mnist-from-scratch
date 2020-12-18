@@ -46,8 +46,9 @@ int main() {
     test_labels_infile.close();
 
     std::cerr << "Training the network..." << std::endl;
-
-    Network<InputLayer<input_size>, HiddenLayer<128>, OutputLayer<output_size>> network(random_engine);
+    constexpr size_t hidden_size = 64;
+    Network<InputLayer<input_size>, HiddenLayer<hidden_size>, OutputLayer<output_size>> network(random_engine);
+    std::cerr << "Hidden layer " << hidden_size << std::endl;
     Trainer<decltype(network)> trainer {
             network,
             train_images,
@@ -55,8 +56,12 @@ int main() {
             test_images,
             test_labels
     };
-
-    trainer.SGD_full<20>(random_engine, 10, 0.06, 0);
+    size_t epochs = 30;
+    constexpr size_t batch_size = 64;
+    number eta_orig = 0.15;
+    number lambda = 0;
+    std::cerr << "Batch size " << batch_size << " eta " << eta_orig << " lambda " << lambda << std::endl;
+    trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, lambda);
 
     return 0;
 

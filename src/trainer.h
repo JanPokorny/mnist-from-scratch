@@ -31,6 +31,8 @@ struct Trainer {
         std::vector<size_t> idx(train_xs.size());
         std::iota(idx.begin(), idx.end(), 0);
         double total_elapsed_seconds = 0.0;
+	double eta_decrease_rate = 0.99999;
+	std::cerr << "eta decrease rate " << eta_decrease_rate << std::endl;
         for (size_t epoch = 0; epoch < epochs; epoch++) {
             std::cerr << "Epoch " << epoch;
             auto start_clock = std::chrono::high_resolution_clock::now();
@@ -42,14 +44,13 @@ struct Trainer {
                     network.backprop(nabla, train_xs[idx[i]], onehot<final_output_type::rows>(train_ys[idx[i]]));
                 }
                 network.update_weights(nabla, eta / mini_batch_size, lambda);
-				eta = 0.999 * eta
+                eta = eta_decrease_rate * eta;
             }
-
             auto end_clock = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
             total_elapsed_seconds += elapsed_seconds.count();
             double test_accuracy = evaluate_accuracy(test_xs, test_ys);
-            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << std::endl;If
+            std::cerr << " | test_acc=" << test_accuracy << " @ " << total_elapsed_seconds << "s" << "| eta " << eta << "lambda " << lambda << std::endl;
         }
     }
 
