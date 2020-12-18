@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <omp.h>
 
 #include "network.h"
 #include "io.h"
@@ -19,6 +20,8 @@ constexpr char predicted_train_labels_path[] = "../out/trainPredictions";
 constexpr char predicted_test_labels_path[] = "../out/actualTestPredictions";
 
 int main() {
+    omp_set_num_threads(4);
+
     auto start_clock = std::chrono::high_resolution_clock::now();
     auto start_time = std::chrono::high_resolution_clock::to_time_t(start_clock);
     std::cerr << "Program started at " << std::ctime(&start_time);
@@ -46,9 +49,7 @@ int main() {
     test_labels_infile.close();
 
     std::cerr << "Training the network..." << std::endl;
-    constexpr size_t hidden_size = 64;
-    Network<InputLayer<input_size>, HiddenLayer<hidden_size>, OutputLayer<output_size>> network(random_engine);
-    std::cerr << "Hidden layer " << hidden_size << std::endl;
+    Network<InputLayer<input_size>, HiddenLayer<64>, OutputLayer<output_size>> network(random_engine);
     Trainer<decltype(network)> trainer {
             network,
             train_images,
@@ -56,7 +57,7 @@ int main() {
             test_images,
             test_labels
     };
-    size_t epochs = 30;
+    size_t epochs = 20;
     constexpr size_t batch_size = 64;
     number eta_orig = 0.15;
     number lambda = 0;
@@ -65,9 +66,6 @@ int main() {
 	std::cerr << "eta decrease rate " << eta_decrease_rate << std::endl;
     trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, lambda, eta_decrease_rate);
 
-    return 0;
-
-    /*
     std::cerr << "Inferring train predictions..." << std::endl;
     std::vector<label_type> predicted_train_labels = network.predict(train_images);
 
@@ -75,8 +73,7 @@ int main() {
     std::ofstream predicted_train_labels_outfile(predicted_train_labels_path);
     save_labels(predicted_train_labels_outfile, predicted_train_labels);
     predicted_train_labels_outfile.close();
-    */
-/*
+
     std::cerr << "Inferring test predictions..." << std::endl;
     std::vector<label_type> predicted_test_labels = network.predict(test_images);
 
@@ -89,7 +86,7 @@ int main() {
     auto end_time = std::chrono::high_resolution_clock::to_time_t(start_clock);
     std::chrono::duration<double> elapsed_seconds = end_clock - start_clock;
     std::cerr << "Program ended at " << std::ctime(&end_time);
-    std::cerr << "Elapsed time: " << elapsed_seconds.count();
+    std::cerr << "Elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 
-    return 0;*/
+    return 0;
 }

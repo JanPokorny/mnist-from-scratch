@@ -6,7 +6,7 @@
 #include "types.h"
 
 template<typename network_type>
-struct alignas(128) Nabla {
+struct Nabla {
     using tail_nabla_type = typename network_type::tail_network_type::nabla_type;
     typename network_type::output_type biases = {};
     typename network_type::weights_type weights = {};

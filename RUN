@@ -7,15 +7,14 @@ echo "    COMPILING    "
 echo "#################"
 mkdir cmake-build-debug >/dev/null 2>&1
 cd cmake-build-debug || exit
-CC=$(which clang) CXX=$(which clang++) cmake ..
-make
+g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -fopenmp -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
 
 echo "#################"
 echo "     RUNNING     "
 echo "#################"
-./pv021_project
+./a.out
 
 echo "#################"
 echo "    EVALUATING   "
 echo "#################"
-python3 ../python_evaluator/evaluate.py ./out/actualTestPredictions ./data/fashion_mnist_test_labels.csv
+python3 ../python_evaluator/evaluate.py ../out/actualTestPredictions ../data/fashion_mnist_test_labels.csv

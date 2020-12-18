@@ -27,11 +27,11 @@ struct mat : std::array<number, R * C> {
     static constexpr size_t columns = C;
 
     constexpr number &at(size_t r, size_t c) {
-        return std::array<number, R * C>::operator[](c * R + r);
+        return std::array<number, R * C>::operator[](r * C + c);
     }
 
     [[nodiscard]] constexpr number const &at(size_t r, size_t c) const {
-        return std::array<number, R * C>::operator[](c * R + r);
+        return std::array<number, R * C>::operator[](r * C + c);
     }
 };
 

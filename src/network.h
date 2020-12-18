@@ -68,9 +68,7 @@ struct Network<previous_layer, current_layer, args...> {
 
         output_type delta;
         if constexpr (current_layer::is_output) {
-//            From cross entropy function
               delta = (current_layer::activation_fn(z) - y);
-//            delta = (current_layer::activation_fn(z) - y) * current_layer::activation_fn_prime(z);
         } else {
             auto next_delta = tail_network.backprop(nabla.tail_nabla, current_layer::activation_fn(z), y);
             delta = dot_t(tail_network.weights, next_delta) * current_layer::activation_fn_prime(z);
@@ -82,12 +80,6 @@ struct Network<previous_layer, current_layer, args...> {
         return delta;
     }
 
-//    void update_weights(nabla_type nabla, number eta_piece) {
-//        weights = weights - nabla.weights * eta_piece;
-//        biases = biases - nabla.biases * eta_piece;
-//        tail_network.update_weights(nabla.tail_nabla, eta_piece);
-//    }
-    // L2 regularization (weight decay), lambda coefficient added
     void update_weights(nabla_type nabla, number eta_piece, number lambda) {
         weights =  weights * (1 - lambda * eta_piece) - nabla.weights * eta_piece;
         biases = biases - nabla.biases * eta_piece;
