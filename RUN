@@ -4,17 +4,46 @@ echo "#################"
 echo "    COMPILING    "
 echo "#################"
 command -v module >/dev/null 2>&1 && echo "Adding GCC 10.2..." && module add gcc-10.2
-mkdir build >/dev/null 2>&1
-cd build || exit
-echo "Compiling main..." && g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
+echo "Compiling main..."
+mkdir build
+cd build
+g++ ../src/main.cpp -Ofast -ffp-contract=fast -funsafe-math-optimizations -march=native -msse2 -mfpmath=sse -ftree-vectorize -std=c++17 || exit
 
 echo "#################"
 echo "     RUNNING     "
 echo "#################"
-mkdir ../out >/dev/null 2>&1
 ./a.out
 
 echo "#################"
-echo "    EVALUATING   "
+echo ''
+echo '          0 _____'
+echo '           X_____\'
+echo '   .-^-.  ||_| |_||  .-^-.'
+echo '  /_\_/_\_|  |_|  |_/_\_/_\'
+echo '  ||(_)| __\_____/__ |(_)||'
+echo '  \/| | |::|\```/|::| | |\/'
+echo '  /`---_|::|-+-+-|::|_---"\'
+echo ' / /  \ |::|-|-|-|::| /  \ \'
+echo '/_/   /|`--"-+-+-`--"|\   \_\'
+echo '| \  / |===/_\ /_\===| \  / |           The machine has now learned.'
+echo '|  \/  /---/-/-\-\  o\  \/  |'
+echo '| ||| | O / /   \ \   | ||| |'
+echo '| ||| ||-------------|o|||| |'
+echo '| ||| ||----\ | /----|o|||| |                    Be afraid.'
+echo '| _|| ||-----|||-----|o|||_ |'
+echo '\/|\/  |     |||     |o|\/|\/'
+echo '\_o/   |----|||||----|-" \o_/'
+echo '       |##  |   |  ##|'
+echo '       |----|   |----|'
+echo '       ||__ |   | __||'
+echo '      [|"  `|] [|"  `|]'
+echo '      [|`--"|] [|`--"|]'
+echo '      /|__| |\ /| |__|\'
+echo '      ||  | || || |  ||'
+echo '      ||__|_|| ||_|__||'
+echo '      ||    || ||    ||'
+echo '      \|----|/ \|----|/'
+echo '      /______\ /______\'
+echo '      |__||__| |__||__|'
+echo ''
 echo "#################"
-python3 ../python_evaluator/evaluate.py ../out/actualTestPredictions ../data/fashion_mnist_test_labels.csv

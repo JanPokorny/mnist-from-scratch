@@ -15,8 +15,7 @@ constexpr char train_labels_path[] = "../data/fashion_mnist_train_labels.csv";
 constexpr char test_images_path[] = "../data/fashion_mnist_test_vectors.csv";
 constexpr char test_labels_path[] = "../data/fashion_mnist_test_labels.csv";
 
-constexpr char predicted_train_labels_path[] = "../out/trainPredictions";
-constexpr char predicted_test_labels_path[] = "../out/actualTestPredictions";
+constexpr char predicted_test_labels_path[] = "../actualPredictions";
 
 int main() {
     auto start_clock = std::chrono::high_resolution_clock::now();
@@ -49,14 +48,6 @@ int main() {
 	double eta_decrease_rate = 0.99999;
 
     trainer.SGD_full<batch_size>(random_engine, epochs, eta_orig, eta_decrease_rate);
-
-    std::cerr << "Inferring train predictions..." << std::endl;
-    std::vector<label_type> predicted_train_labels = network.predict(train_images);
-
-    std::cerr << "Writing train predictions..." << std::endl;
-    std::ofstream predicted_train_labels_outfile(predicted_train_labels_path);
-    save_labels(predicted_train_labels_outfile, predicted_train_labels);
-    predicted_train_labels_outfile.close();
 
     std::cerr << "Loading test images..." << std::endl;
     std::ifstream test_images_infile(test_images_path);
